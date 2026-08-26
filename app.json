@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "MARBA Drivers",
+    "slug": "marba-drivers-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#0F2140"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.marba.drivers",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Yol bosib otilgan masofani hisoblash uchun joylashuvingiz kerak."
+      }
+    },
+    "android": {
+      "package": "com.marba.drivers",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F2140"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Yol bosib otilgan masofani hisoblash uchun joylashuvingiz kerak."
+        }
+      ],
+      "expo-secure-store"
+    ]
+  }
+}
