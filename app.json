@@ -6,14 +6,16 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
-    "splash": {
-      "backgroundColor": "#0F2140"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.marba.drivers",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Yol bosib otilgan masofani hisoblash uchun joylashuvingiz kerak."
+        "NSLocationWhenInUseUsageDescription": "Yol bosib otilgan masofani hisoblash uchun joylashuvingiz kerak.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Yolda ekaningizda fonda ham masofani kuzatish uchun joylashuvingiz kerak.",
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
       }
     },
     "android": {
@@ -24,17 +26,45 @@
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
       ]
     },
     "plugins": [
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Yol bosib otilgan masofani hisoblash uchun joylashuvingiz kerak."
+          "locationAlwaysAndWhenInUsePermission": "Yolda ekaningizda fonda ham masofani kuzatish uchun joylashuvingiz kerak.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ],
-      "expo-secure-store"
-    ]
+      "expo-task-manager",
+      "expo-notifications",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#0F2140"
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8adc75b5-1598-4320-aaec-3aa9135667ab"
+      }
+    }
   }
 }
