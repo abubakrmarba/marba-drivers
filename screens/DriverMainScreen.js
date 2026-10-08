@@ -4,7 +4,7 @@ import {
   ActivityIndicator, Alert, Modal, TextInput,
 } from "react-native";
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from "../supabaseClient";
-import { startBackgroundTracking, stopBackgroundTracking, loadRouteState } from "../routeTracking";
+import { startBackgroundTracking, stopBackgroundTracking, loadRouteState, pushOutbox } from "../routeTracking";
 import RouteMap from "./RouteMap";
 import { WebView } from "react-native-webview";
 import { enqueueSync, flushQueue, pendingCount, isOnline } from "../syncQueue";
@@ -173,7 +173,9 @@ export default function DriverMainScreen({ driverEmail, onLogout }) {
     }
 
     // Serverga xabar berish orqada ketadi; internet bo'lmasa kuzatuv to'xtamaydi
-    supabase.from("drivers").update({ on_route: true, route_km: 0 }).eq("auth_user_id", uid).then(() => {}, () => {});
+    supabase.from("drivers").update({ on_route: true, route_km: 0, route_started_at: routeStartedAtRef.current }).eq("auth_user_id", uid).then(() => {}, () => {});
+    // Oldingi yo'lning izini serverdan tozalaymiz
+    supabase.from("route_points").delete().eq("driver_auth_uid", uid).then(() => {}, () => {});
 
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(async () => {
@@ -187,6 +189,8 @@ export default function DriverMainScreen({ driverEmail, onLogout }) {
     setOnRoute(false);
 
     const finalState = await stopBackgroundTracking();
+    // Yo'l izining qolgan nuqtalarini yuborishga urinamiz (internet bo'lmasa o'tkazib yuboriladi)
+    if (finalState) { try { for (let i = 0; i < 8 && (finalState.outbox || []).length > 0; i++) { if (!(await pushOutbox(finalState))) break; } } catch (e) {} }
     const finalKm = (finalState && finalState.km) || routeKm;
     const startedIso = finalState && finalState.startedAt
       ? new Date(finalState.startedAt).toISOString()

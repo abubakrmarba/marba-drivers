@@ -80,6 +80,28 @@ export async function dismissNotification() {
   } catch (e) {}
 }
 
+// Yuborilmagan yo'l nuqtalarini route_points jadvaliga yozadi. Muvaffaqiyatli bo'lsa true.
+export async function pushOutbox(state) {
+  const pts = (state.outbox || []).slice(0, 500);
+  if (pts.length === 0 || !state.driverAuthUid) return true;
+  try {
+    const startedIso = new Date(state.startedAt).toISOString();
+    const rows = pts.map((p) => ({ driver_auth_uid: state.driverAuthUid, started_at: startedIso, lat: p[0], lng: p[1] }));
+    const res = await withTimeout(Promise.resolve(supabase.from("route_points").insert(rows)), 8000);
+    if (res.error) return false;
+    state.outbox = (state.outbox || []).slice(pts.length);
+    // Holat boshqa chaqiruvda o'zgargan bo'lishi mumkin: so'nggi holatni o'qib, yuborilganlarni olib tashlaymiz
+    const cur = await loadRouteState();
+    if (cur && cur.startedAt === state.startedAt) {
+      cur.outbox = (cur.outbox || []).slice(pts.length);
+      await saveRouteState(cur);
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (error || !data) return;
   const locations = data.locations || [];
@@ -111,9 +133,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
           current_lng: state.prevLng,
           route_km: state.km || 0,
           on_route: true,
+          route_started_at: new Date(state.startedAt).toISOString(),
           last_ping_at: new Date().toISOString(),
         }).eq("auth_user_id", state.driverAuthUid)
       ), 8000);
+      // Yo'l izi: yuborilmagan nuqtalarni serverga qo'shamiz (muvaffaqiyatli bo'lsa navbatdan olib tashlaymiz)
+      if (!res.error) await pushOutbox(state);
       // Aloqa bor ekan: navbatdagi (yuborilmay qolgan) yozuvlarni ham yuboramiz
       if (!res.error && (await pendingCount()) > 0) await flushQueue();
     } catch (e) {}

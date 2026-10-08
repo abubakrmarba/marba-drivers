@@ -27,6 +27,10 @@ function pushTrack(state, lat, lng) {
     if (haversineM(last[0], last[1], pt[0], pt[1]) < TRACK_MIN_STEP_M) return;
   }
   t.push(pt);
+  // Serverga hali yuborilmagan nuqtalar (web appda yo'l izini ko'rsatish uchun)
+  if (!state.outbox) state.outbox = [];
+  state.outbox.push(pt);
+  if (state.outbox.length > 4000) state.outbox = state.outbox.slice(-2000);
   if (t.length > TRACK_MAX_POINTS) {
     // juda uzun yo'lda har ikkinchi nuqtani olib tashlaymiz (boshi va oxiri qoladi)
     state.track = t.filter((_, i) => i % 2 === 0 || i === t.length - 1);
